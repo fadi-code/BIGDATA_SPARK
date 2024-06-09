@@ -18,7 +18,7 @@ RUN pip install requests hdfs pymongo
 USER spark
 
 # Copier le fichier principal dans l'image Docker
-COPY main.py /home/main.py
+COPY main.py  transform_and_save.py imdb_loader.py /home/
 
 # Télécharger et installer le connecteur Spark-MongoDB en tant qu'utilisateur root
 USER root

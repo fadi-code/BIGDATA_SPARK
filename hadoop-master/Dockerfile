@@ -1,15 +1,19 @@
 FROM liliasfaxi/spark-hadoop:hv-2.7.2
 
-# Copy the configuration files
+# Installer curl et bash
+USER root
+RUN apt-get update && apt-get install -y curl bash
+
+# Copier les fichiers de configuration
 COPY hadoop-env.sh /usr/local/hadoop/etc/hadoop/hadoop-env.sh
 COPY core-site.xml /usr/local/hadoop/etc/hadoop/core-site.xml
 COPY hdfs-site.xml /usr/local/hadoop/etc/hadoop/hdfs-site.xml
 
-# Copy the entrypoint script
+# Copier le script d'entrée
 COPY entrypoint.sh /entrypoint.sh
 
-# Make the entrypoint script executable
+# Rendre le script d'entrée exécutable
 RUN chmod +x /entrypoint.sh
 
-# Use the entrypoint script as the container's entrypoint
+# Utiliser le script d'entrée comme point d'entrée du conteneur
 ENTRYPOINT ["/entrypoint.sh"]
