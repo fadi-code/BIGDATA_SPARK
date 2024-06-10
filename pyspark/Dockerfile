@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y curl wget default-jdk
 RUN mkdir -p /var/lib/apt/lists && chmod 755 /var/lib/apt/lists
 
 # Installer les bibliothèques Python nécessaires en tant qu'utilisateur root
-RUN pip install requests hdfs pymongo
+RUN pip install requests hdfs pymongo findspark
+
 
 # Rétablir l'utilisateur par défaut
 USER spark
@@ -22,7 +23,7 @@ COPY main.py /home/main.py
 
 # Télécharger et installer le connecteur Spark-MongoDB en tant qu'utilisateur root
 USER root
-COPY mongo-spark-connector_2.13-10.3.0.jar /opt/spark/jars/mongo-spark-connector_2.13-10.3.0.jar
+#COPY mongo-spark-connector_2.13-10.3.0.jar /opt/spark/jars/mongo-spark-connector_2.13-10.3.0.jar
 
 
 
@@ -30,4 +31,4 @@ COPY mongo-spark-connector_2.13-10.3.0.jar /opt/spark/jars/mongo-spark-connector
 WORKDIR /home
 
 # Définir le point d'entrée pour exécuter le script principal
-ENTRYPOINT ["/opt/spark/bin/spark-submit", "--packages", "org.mongodb.spark:mongo-spark-connector_2.13:10.3.0", "/home/main.py"]
+ENTRYPOINT ["/opt/spark/bin/spark-submit", "--packages", "org.mongodb.spark:mongo-spark-connector_2.12:3.0.1", "/home/main.py"]
