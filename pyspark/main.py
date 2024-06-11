@@ -22,8 +22,8 @@ def main():
     mongo_collection = "name_basics"
 
     # Téléchargement et chargement initial des données IMDb
-    #loader = IMDBDataLoader(imdb_dataset_url, imdb_gz_file_name, imdb_tsv_file_name, hdfs_url, hdfs_user, hdfs_base_dir)
-    #loader.run()
+    loader = IMDBDataLoader(imdb_dataset_url, imdb_gz_file_name, imdb_tsv_file_name, hdfs_url, hdfs_user, hdfs_base_dir)
+    loader.run()
 
     # Transformation et sauvegarde des données dans HDFS et MongoDB
     pipeline = IMDbDataPipeline(imdb_tsv_path, hdfs_path, mongo_uri, "mydb", "name_basics")
