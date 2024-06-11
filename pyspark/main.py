@@ -1,9 +1,8 @@
-from pyspark.sql import SparkSession
-from hdfs import InsecureClient
-from pyspark.sql import Row
-import time
+from loader import IMDBDataLoader
+from transform import IMDbDataPipeline
 
 
+"""
 #mongo_uri = "mongodb://127.0.0.1:27017"
 mongo_uri = "mongodb+srv://medouse15:6TbzE9CqeQFsM26r@imdb.ixiodlp.mongodb.net/"
 
@@ -11,33 +10,53 @@ output_directory = "/user/root/imdb/split/"
 hdfs_url = "http://hadoop-master:50070"
 hdfs_user = "root"
 hdfs_file_path = "/root/hdfs/purchases.txt"
+"""
 
-def split_hdfs_file(hdfs_url, hdfs_user, hdfs_file_path, output_directory, chunk_size):
-    client = InsecureClient(hdfs_url, user=hdfs_user)
-    with client.read(hdfs_file_path) as reader:
-        # Lecture du fichier depuis HDFS
-        content = reader.read()
-        # Calcul du nombre de chunks nécessaires
-        num_chunks = len(content) // chunk_size
-        if len(content) % chunk_size != 0:
-            num_chunks += 1
-        # Écriture des chunks dans des fichiers sur HDFS
-        for i in range(num_chunks):
-            chunk_data = content[i * chunk_size: (i + 1) * chunk_size]
-            with client.write(f"{output_directory}part_{i}", overwrite=True) as writer:
-                writer.write(chunk_data)
-
-def transform_and_load_data(spark, hdfs_path, mongo_uri):
-    # Lire les parties du fichier TSV depuis HDFS
-    df = spark.read.option("header", "true").option("sep", "\t").csv(hdfs_path + "*")
-    
-    # Transformation des données (exemple: sélectionner des colonnes spécifiques)
-    # transformed_df = df.select("nconst", "primaryName", "birthYear", "deathYear", "primaryProfession", "knownForTitles")
-    
-    # Charger les données transformées dans MongoDB
-    df.write.format("mongo").mode("append").option("uri", mongo_uri).option("database", "mydb").option("collection", "name_basics").save()
 
 def main():
+    imdb_dataset_url = "https://datasets.imdbws.com/name.basics.tsv.gz"
+    imdb_gz_file_name = "name.basics.tsv.gz"
+    imdb_tsv_file_name = "name.basics.tsv"
+    hdfs_base_dir = "/imdb"
+    hdfs_url = "http://hadoop-master:50070"
+    hdfs_user = "root"
+
+    # Chemin complet vers le fichier TSV dans HDFS
+    imdb_tsv_path = "hdfs://hadoop-master:9000/imdb/name.basics.tsv"
+    # Répertoire de sortie dans HDFS pour les données traitées
+    hdfs_path = "/user/root/imdb/split/"
+    # URI de connexion MongoDB
+    mongo_uri = "mongodb://mongodb:27017"
+    # Nom de la base de données MongoDB
+    mongo_db = "mydb"
+    # Nom de la collection MongoDB
+    mongo_collection = "name_basics"
+
+
+
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    #loader = IMDBDataLoader(imdb_dataset_url, imdb_gz_file_name, imdb_tsv_file_name, hdfs_url, hdfs_user, hdfs_base_dir)
+    #loader.run()
+
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+    print("-----------------------------------------")
+
+
+    # Transformation et sauvegarde des données dans HDFS et MongoDB
+    pipeline = IMDbDataPipeline(imdb_tsv_path, hdfs_path, mongo_uri, "myimdb", "name_basics")
+    pipeline.run()
+
+
+    """
     # Initialiser SparkSession
     spark = SparkSession.builder \
         .appName("IMDbDataPipeline") \
@@ -132,7 +151,7 @@ def main():
 
     df.printSchema()
 
-    df.write.format("mongo").mode("append").option("database", "imdb").option("collection","mart_data").save()
+    df.write.format("mongo").mode("append").option("database", "imdb").option("collection","fadiu").save()
 
     print("-----------------------")
     print("-----------------------")
@@ -148,6 +167,6 @@ def main():
 
     time.sleep(1000)
 
-
+    """
 if __name__ == "__main__":
     main()
