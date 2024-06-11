@@ -24,20 +24,16 @@ class IMDbDataPipeline:
         return self.spark.read.option("header", "true").option("sep", "\t").csv(self.imdb_tsv_path)
 
     def clean_data(self, df):
-        # Handle missing values
+        # Missing values
         df = df.na.fill("Unknown", subset=["primaryName", "birthYear", "deathYear", "primaryProfession", "knownForTitles"])
-        
-        # Handle inconsistencies (example: convert birthYear and deathYear to integers, replace "\\N" with null)
         df = df.withColumn("birthYear", when(col("birthYear") == "\\N", None).otherwise(col("birthYear").cast("int")))
         df = df.withColumn("deathYear", when(col("deathYear") == "\\N", None).otherwise(col("deathYear").cast("int")))
         
         return df
 
     def transform_data(self, df):
-        # Example transformation: extract the year from birthYear
         df = df.withColumn("birthYear", col("birthYear").cast("int"))
         
-        # Example aggregation: count number of knownForTitles per person
         df = df.withColumn("numKnownForTitles", col("knownForTitles").isNotNull().cast("int"))
         
         return df
@@ -47,7 +43,7 @@ class IMDbDataPipeline:
         df.write \
         .format("csv") \
         .option("header", "true") \
-        .save("path/to/output.csv")
+        .save("data/output.csv")
         print(f"Data saved to HDFS at {self.hdfs_path}")
 
     def save_to_mongodb(self, df):
@@ -64,9 +60,9 @@ class IMDbDataPipeline:
 
         df = self.transform_data(df)
 
-        self.save_to_hdfs(df.limit(100))
+        self.save_to_hdfs(df)
 
-        self.save_to_mongodb(df.limit(100))
+        self.save_to_mongodb(df)
 
 
 
